@@ -1,0 +1,37 @@
+.promo-strip {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.scrolling {
+  display: inline-block;
+  animation: scroll-left 15s linear infinite;
+  padding-bottom: 10px;
+  padding-top: 0px;
+}
+
+.scrolling span {
+  display: inline-block;
+  margin: 0 80px;
+  font-size: 48px;
+}
+
+.scrolling span.bold {
+  font-weight: 700;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .scrolling span {
+    margin: 0 40px;
+    font-size: 28px;
+  }
+}

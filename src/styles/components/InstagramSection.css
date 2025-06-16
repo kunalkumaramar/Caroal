@@ -1,0 +1,113 @@
+.instagram {
+  padding: 45px 0px;
+  text-align: center;
+  background: #fff;
+}
+
+.instagram h2 {
+  font-size: 46px;
+  font-weight: 400;
+  margin-bottom: 0;
+  color: #484848;
+  font-family: 'Volkhov', serif;
+}
+
+.instagram p {
+  font-size: 16px;
+  color: #8A8A8A;
+  max-width: 600px;
+  margin: 0 auto 8px;
+  line-height: 1.6;
+  font-family: 'Poppins',sans-serif;
+}
+
+.instagram-images {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0px;
+  flex-wrap: wrap;
+}
+
+/* Shared base styles */
+.instagram-images img {
+  object-fit: cover;
+  border-radius: 4px;
+  transition: transform 0.3s ease;
+}
+
+/* Images 1, 3, 5, 7 */
+.instagram-images img:nth-child(odd) {
+   width: 190px;
+   height: 310px;
+   margin-top: 55px;
+}
+
+/* Images 2, 4, 6 */
+.instagram-images img:nth-child(even) {
+    width: 251px;
+    height: 360px;
+    margin-top: 25px;
+}
+
+.instagram-images img:hover {
+  transform: scale(1.05);
+}
+.follow-btn {
+  background: transparent;
+  color: #000;
+  border: 1px solid #000;
+  border-radius: 20px;
+  font-weight: 400;
+  padding: 10px 20px;
+  font-size: 22px;
+  font-family: 'Volkhov', serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 40px;
+}
+
+.follow-btn:hover {
+  background: #000;
+  color: #fff;
+}
+@media screen and (max-width: 767px) {
+  .instagram-images {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    padding: 10px 10px 20px;
+    gap: 0px;
+  }
+
+  .instagram p {
+    margin: 8px 8px 8px;
+  }
+
+  .instagram-images::-webkit-scrollbar {
+    display: none;
+  }
+
+  .instagram-images img {
+    flex: 0 0 auto;
+    object-fit: cover;
+    border-radius: 4px;
+    transition: transform 0.3s ease;
+  }
+
+  /* Keep the odd/even logic for image sizes */
+  .instagram-images img:nth-child(odd) {
+    width: 140px;
+    height: 230px;
+    margin-top: 30px;
+  }
+
+  .instagram-images img:nth-child(even) {
+    width: 180px;
+    height: 280px;
+    margin-top: 10px;
+  }
+}

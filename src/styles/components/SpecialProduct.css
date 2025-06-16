@@ -1,0 +1,273 @@
+.coral-specials {
+  background: #f5f5f5;
+  padding: 0 0rem;
+  font-family: 'Volkhov', serif;
+}
+
+.specials-container {
+  display: flex;
+  gap: 3rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  position: relative; /* Needed for slant positioning */
+}
+
+.model-section {
+  flex: 1;
+  position: relative;
+}
+
+.image-container {
+  position: relative;
+}
+
+.model-image1 {
+  width: 100%;
+  max-width: 551px;
+  display: block;
+  margin-left: 20px;
+}
+
+/* ==================== */
+/* === Tag Styling ==== */
+/* ==================== */
+.tag {
+  position: absolute;
+  background: #FFFFFF69;
+  padding: 6px 12px;
+  border-radius: 0px;
+  box-shadow: 0px 10px 5px rgba(0,0,0,0.15);
+  font-size: 14px;
+  color: #000;
+  white-space: nowrap;
+  font-family: 'Poppins',sans-serif;
+  font-weight: 400;
+}
+
+.tag::before {
+  content: '';
+  position: absolute;
+  background: black;
+  width: 2px;
+}
+
+/* === Individual Tag Positions and Lines === */
+.flat-cap {
+  top: 8px;
+  left: 58%;
+}
+.flat-cap::before {
+  height: 60px;
+  top: -12%;
+  left: -41%;
+  transform: translateX(-50%) rotate(77deg);
+}
+
+.suspenders {
+  top: 150px;
+  left: 1%;
+}
+.suspenders::before {
+  height: 113px;
+  top: -123%;
+  left: 162%;
+  transform: translateX(-50%) rotate(90deg);
+}
+
+.hugo1 {
+  top: 275px;
+  left: 52%;
+}
+.hugo1::before {
+  height: 120px;
+  top: -200%;
+  left: -62%;
+  transform: translateX(-50%) rotate(110deg);
+}
+
+.hugo2 {
+  top: 312px;
+  left: 1%;
+}
+.hugo2::before {
+  height: 103px;
+  top: -100%;
+  left: 158%;
+  transform: translateX(-50%) rotate(94deg);
+}
+
+.santoni {
+  bottom: 28px;
+  left: 46%;
+
+}
+.santoni::before {
+  height: 37px;
+  top: 33%;
+  left: -25%;
+  transform: translateX(-50%) rotate(65deg);
+}
+
+.slant-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 42.5%; /* Adjust as per design */
+  width: 5px; /* Thickness of the line */
+  background: black; /* Line color */
+  transform: skew(-18deg); /* Adjust angle as needed */
+  transform-origin: center;
+  z-index: 1;
+}
+
+/* ===================== */
+/* === Info Section ==== */
+/* ===================== */
+.info-section {
+  flex: 1;
+  max-width: 670px;
+  position: relative; /* fallback color */ 
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center; /* trapezium shape */
+  padding: 2rem; /* optional shadow */
+}
+
+
+.collection-label {
+  font-size: 16px;
+  color: #767676;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  font-family: 'Poppins',sans-serif;
+}
+
+.product-title {
+  font-size: 46px;
+  font-weight: 400;
+  margin-bottom: 50px;
+}
+
+.desc-title {
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  font-size: 16px;
+  font-family: 'Poppins',sans-serif;
+  text-decoration: underline;
+}
+
+.product-description {
+  font-size: 16px;
+  color: #767676;
+  line-height: 1.6rem;
+  margin-bottom: 1.5rem;
+  font-family: 'Poppins',sans-serif;
+}
+
+.size-price {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.size-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.size-label {
+  font-weight: 400;
+  font-family: 'Poppins',sans-serif;
+  color: #767676;
+}
+
+.size-button {
+  background: black;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 400;
+  cursor: pointer;
+  font-family: 'Poppins',sans-serif;
+}
+
+.price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: 'Poppins',sans-serif;
+}
+
+.buy-now {
+  background: black;
+  color: white;
+  padding: 12px 46px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Poppins',sans-serif;
+  font-weight: 400;
+}
+
+/* ======================== */
+/* === Feature Section ==== */
+/* ======================== */
+.feature-icons {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.icon-text-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.feature-icon {
+  font-size: 2rem;
+  color: black;
+}
+
+.sub-icon {
+  font-size: 1.5rem;
+  color: gray;
+  margin-top: 0.5rem;
+}
+
+.feature-title {
+  font-weight: 500;
+  font-size: 20px;
+  text-align: justify;
+  margin-bottom: 0;
+  font-family: 'Poppins',sans-serif;
+  color: #484848;
+}
+
+.feature-text {
+  font-size: 16px;
+  font-family: 'Poppins',sans-serif;
+  font-weight: 400;
+  color: #484848;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  text-align: justify;
+}
+
+@media screen and (max-width: 767px) {
+  .coral-specials {
+    display: none !important;
+  }
+}

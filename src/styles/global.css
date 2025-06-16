@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Volkhov:wght@400;700&display=swap');
+
+body {
+  font-family: 'Volkhov', serif;
+  margin: 0;
+  background: #fff;
+  color: #000;
+  overflow-x: hidden;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.tag-strip {
+  white-space: nowrap;
+  overflow-x: auto;
+}

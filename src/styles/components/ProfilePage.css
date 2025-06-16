@@ -1,0 +1,273 @@
+.profile-page-container {
+  display: flex;
+  padding: 40px;
+  font-family: 'Volkhov', serif;
+  padding-bottom: 95px;
+}
+
+.left-pane {
+  width: 30%;
+  padding-right: 20px;
+  border-right: 1px solid #ddd;
+}
+
+.left-pane h2 {
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+.nav-card {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.nav-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-card img {
+  width: 120px;
+  margin-right: 12px;
+}
+
+.logout-btn {
+  margin-top: 20px;
+  background: black;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Poppins',sans-serif;
+}
+.logout-btn:hover{
+  background-color: #333;
+}
+
+.details-right {
+  flex: 1;
+  padding-left: 40px;
+}
+
+.details-right h3 {
+  font-size: 36px;
+  margin-bottom: 20px;
+  font-family: 'Volkhov', sans-serif;
+  font-weight: 400;
+}
+
+.details-right p {
+  font-size: 17px;
+  margin: 5px 0;
+  font-family: 'Poppins',sans-serif;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.form-grid input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.save-btn {
+  margin-top: 20px;
+  background: black;
+  color: white;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.order-item {
+  border: 1px solid #ddd;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+.back-btn {
+  background: none;
+  color: #333;
+  border: none;
+  font-size: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.user-info p {
+  font-size: 17px;
+  margin: 6px 0;
+  font-family: 'Poppins', sans-serif;
+}
+.h{
+  font-size: 36px;
+  margin-bottom: 20px;
+  font-family: 'Volkhov', sans-serif;
+  font-weight: 400;
+}
+
+.address-card {
+  background: #f2f2f2;
+  border: 1px solid #ddd;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.checkbox-label {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.no-address {
+  background: #fff;
+  border: 1px solid;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+.headers{
+    font-size: 39px;
+    font-family: 'Volkhov', sans-serif;
+    font-weight: 400;
+    margin: 0;
+}
+.sub{
+  font-size: 18px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  color: #9D9D9D;
+  margin-top: 0;
+}
+.add-address-btn {
+  margin-top: 10px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-family: 'Poppins',sans-serif;
+}
+
+.add-address-btn:hover {
+  background-color: #333;
+}
+.svg{
+  height: 120px;
+  width: 120px; 
+  color: #FFA500; 
+  margin-right: 12px; 
+}
+@media (max-width: 768px) {
+  .profile-page-container {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .left-pane {
+    width: 100%;
+    padding-right: 0;
+    border-right: none;
+    margin-bottom: 30px;
+  }
+
+  .nav-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px;
+  }
+
+  .nav-card img {
+    width: 80px;
+    margin-right: 10px;
+  }
+
+  .logout-btn {
+    width: 100%;
+  }
+
+  .details-right {
+    padding-left: 0;
+  }
+
+  .details-right h3,
+  .h,
+  .headers {
+    font-size: 24px;
+    text-align: left;
+  }
+
+  .details-right p,
+  .user-info p {
+    font-size: 15px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .form-grid input {
+    font-size: 13px;
+  }
+
+  .save-btn {
+    width: 100%;
+    font-size: 15px;
+  }
+
+  .order-item {
+    font-size: 14px;
+  }
+
+  .back-btn {
+    font-size: 13px;
+  }
+
+  .address-card,
+  .no-address {
+    font-size: 13px;
+  }
+
+  .checkbox-label {
+    font-size: 13px;
+  }
+
+  .add-address-btn {
+    width: 100%;
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .sub {
+    font-size: 16px;
+  }
+  .svg{
+    height: 60px;
+    width: 60px; 
+    color: #FFA500; 
+    margin-right: 12px; 
+  }
+}
