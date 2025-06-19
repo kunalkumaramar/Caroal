@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
 import '../styles/components/SignIn.css';
 import { FcGoogle } from 'react-icons/fc';
-import { SiGmail } from 'react-icons/si';
 import model from '../assets/images/collab-image.png';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { signupUser } from '../redux/authSlice';
 
 const SignUp = () => {
-  const { registerUser } = useUser();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.auth);
+  const clientId = "470840173572-uccvmrbffgfq4u39bkhpohsuugmh6s1b.apps.googleusercontent.com";
+  const redirectUri = "http://localhost:3000/Caroal/auth/google/callback";
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -23,18 +26,24 @@ const SignUp = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match.');
       return;
     }
 
-    const { confirmPassword, ...userData } = formData; // Remove confirmPassword before storing
-    registerUser(userData);
-    navigate('/signin');
-  };
+    const { confirmPassword, ...userData } = formData;
 
+    const res = await dispatch(signupUser(userData));
+    if (res.meta.requestStatus === 'fulfilled') {
+      navigate('/signin');
+    }
+  };
+  const handleGoogleLogin = () => {
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile`;
+    window.location.href = url;
+  };
   return (
     <div className="signin-wrapper">
       <div className="signin-container fade-in-up">
@@ -45,11 +54,13 @@ const SignUp = () => {
           <div className="signin-box">
             <h1>CAROAL</h1>
             <h2>Create Account</h2>
-            <div className="signin-social">
+
+            <div className="signin-social" onClick={handleGoogleLogin}>
               <button className="google-btn"><FcGoogle size={20} /> Sign up with Google</button>
-              <button className="email-btn"><SiGmail size={20} color="#EA4335" /> Sign up with Email</button>
             </div>
+
             <div className="divider"><span>OR</span></div>
+
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <input
@@ -69,6 +80,7 @@ const SignUp = () => {
                   required
                 />
               </div>
+
               <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                 <input
                   name="email"
@@ -87,6 +99,7 @@ const SignUp = () => {
                   required
                 />
               </div>
+
               <input
                 name="password"
                 type="password"
@@ -105,10 +118,14 @@ const SignUp = () => {
                 required
                 style={{ marginTop: '10px' }}
               />
-              <button className="signin-button" type="submit" style={{ marginTop: '10px' }}>
-                Create Account
+
+              <button className="signin-button" type="submit" style={{ marginTop: '10px' }} disabled={loading}>
+                {loading ? 'Creating Account...' : 'Create Account'}
               </button>
             </form>
+
+            {error && <p className="error-message">{error}</p>}
+
             <div className="extra-links" style={{ marginTop: '20px' }}>
               Already have an account?{' '}
               <span
@@ -118,6 +135,7 @@ const SignUp = () => {
                 Login
               </span>
             </div>
+
             <div className="terms">CAROAL Terms & Conditions</div>
           </div>
         </div>

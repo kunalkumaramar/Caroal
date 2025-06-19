@@ -8,19 +8,17 @@ import "slick-carousel/slick/slick-theme.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { UserProvider } from './context/UserContext';
-import { CartProvider } from './context/CartContext'; 
+import { Provider } from 'react-redux';
+import store from './redux/store'; // Make sure this file exists and exports a valid Redux store
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
   <React.StrictMode>
-    <UserProvider>
-      <CartProvider> 
-        <App />
-        <ToastContainer />
-      </CartProvider>
-    </UserProvider>
+    <Provider store={store}>
+      <App />
+      <ToastContainer />
+    </Provider>
   </React.StrictMode>
 );
 

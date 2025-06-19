@@ -6,14 +6,14 @@ import bannerImage from '../assets/images/banner-two-men.png';
 import modelTop from '../assets/images/hero-men-group.png';
 import { FaShoppingCart, FaArrowUp } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from "../context/UserContext";
+import { useSelector } from 'react-redux';
 
 const HeroSection = () => {
   const navigate = useNavigate();
-  const { currentUser } = useUser();
+  const user = useSelector((state) => state.auth.user);
 
   const handleShopNow = () => {
-    currentUser ? navigate("/products") : navigate("/signin");
+    user ? navigate("/products") : navigate("/signin");
   };
 
   return (

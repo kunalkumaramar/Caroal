@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext";
 import {
   FaEye,
   FaRegStar,
@@ -17,27 +16,33 @@ import SpecialProduct from "../components/SpecialProduct";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import pay from "../assets/images/payment.png";
-import { toast } from 'react-toastify';
-import { useUser } from "../context/UserContext";
+import { toast } from "react-toastify";
+import { useSelector, useDispatch } from "react-redux";
+import { addToCart } from '../redux/cartSlice';
 
 const ProductDetails = () => {
   const { state } = useLocation();
-  const { currentUser } = useUser();
+  const currentUser = useSelector((state) => state.auth.user);
   const product = state?.product;
-  const { addToCart } = useCart();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  const [selectedQty, setSelectedQty] = useState(1);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState('Default');
   const initialImage = product?.images?.[0] || product?.image;
   const [selectedImg, setSelectedImg] = useState(initialImage);
   const [viewerCount, setViewerCount] = useState(1);
   const [quantity, setQuantity] = useState(1);
   const [showCart, setShowCart] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
     hours: 0,
     minutes: 5,
     seconds: 59,
     days: 0,
   });
-  const [showSignInModal, setShowSignInModal] = useState(false);
+
   const imageRef = useRef(null);
   const [zoomStyle, setZoomStyle] = useState({});
 
@@ -46,7 +51,7 @@ const ProductDetails = () => {
     const timer = setInterval(() => {
       const now = new Date().getTime();
       const distance = endTime - now;
-      
+
       if (distance <= 0) {
         clearInterval(timer);
         setTimeLeft({ hours: 0, minutes: 0, seconds: 0, days: 0 });
@@ -62,14 +67,16 @@ const ProductDetails = () => {
 
     return () => clearInterval(timer);
   }, []);
+
   const handleCheckout = () => {
-  if (!currentUser || !currentUser.shippingAddress || !currentUser.shippingAddress.city) {
-    toast.info("Please add your address to proceed.");
-    navigate("/profile");
-  } else {
-    navigate("/checkout");
-  }
+    if (!currentUser || !currentUser.shippingAddress?.city) {
+      toast.info("Please add your address to proceed.");
+      navigate("/profile");
+    } else {
+      navigate("/checkout");
+    }
   };
+
   const handleMouseMove = (e) => {
     const rect = imageRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -95,35 +102,49 @@ const ProductDetails = () => {
   if (!product) return <p>Product not found.</p>;
 
   const images = product.images?.length > 0 ? product.images : Array(4).fill(product.image);
-
+  const cleanPrice = parseFloat(String(product.price || "0").replace(/[^0-9.]/g, ""));
   const handleAddToCart = () => {
   if (!currentUser) {
     setShowSignInModal(true);
     return;
   }
-  const cleanPrice = parseFloat((product.price || "0").replace(/[^0-9.]/g, ""));
 
-  addToCart({
-    id: product.id,
-    name: product.name,
-    price: cleanPrice,
-    quantity,
-    image: selectedImg,
-    color: "Red",
-   });
-   
-    if (window.innerWidth >= 768) {
-      setShowCart(true);
-    } else {
-      toast.success("Item added to cart!", { autoClose: 2000 });
-    }
+  if (!selectedSize) {
+    toast.warning("Please select a size before adding to cart.");
+    return;
+  }
 
-  };
+console.log("🧪 Verifying product object:", product);
+
+const payload = {
+  productId: product?._id,
+  name: product?.name || '',
+  price: product?.price || 0,
+  quantity: quantity,
+  image: selectedImg || product?.images?.[0] || product?.image || '',
+  color: selectedColor,
+  size: selectedSize,
+};
+
+console.log('🚀 Payload to backend:', payload);
+
+if (!payload.productId) {
+  toast.error("Missing productId! Cannot add to cart.");
+  return;
+}
+
+dispatch(addToCart(payload));
+
+
+  if (window.innerWidth >= 768) {
+    setShowCart(true);
+  } else {
+    toast.success("Item added to cart!", { autoClose: 2000 });
+  }
+};
 
   const handleCloseCart = () => setShowCart(false);
-  const cleanPrice = parseFloat((product.price || "0").replace(/[^0-9.]/g, ""));
-
-
+  
   return (
     <>
       <Header />
@@ -187,22 +208,22 @@ const ProductDetails = () => {
           <p className="stock-warning">Only 9 item(s) left in stock!</p>
 
           <div className="size-section">
-            <p><strong>Size:</strong></p>
             {['M', 'L', 'XL', 'XXL'].map(size => (
-              <button key={size} className="size-btn">{size}</button>
+            <button
+              key={size}
+              className={`size-btn ${selectedSize === size ? 'selected' : ''}`}
+              onClick={() => setSelectedSize(size)}
+            >
+            {size}
+            </button>
             ))}
           </div>
 
-          <div className="color-section1">
-            <p><strong>Color:</strong></p>
-            {product.colors.map((color, i) => (
-              <span
-                key={i}
-                className="color-dot1"
-                style={{ backgroundColor: color }}
-              ></span>
-            ))}
-          </div>
+         <div className="description-section1">
+          <p><strong>Description:</strong></p>
+          <p className="product-description">{product.description}</p>
+        </div>
+
 
           <div className="quantity-cart-section">
             <p><strong>Quantity:</strong></p>
@@ -246,14 +267,13 @@ const ProductDetails = () => {
               <img src={selectedImg} alt="cart-product" />
               <div>
                 <p>{product.name}</p>
-                <p>Color: Red</p>
                 <p>{product.price}</p>
               </div>
-            <div className="quantity-box">
-              <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
-              <span>{quantity}</span>
-              <button onClick={() => setQuantity(q => q + 1)}>+</button>
-            </div>
+              <div className="quantity-box">
+                <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
+                <span>{quantity}</span>
+                <button onClick={() => setQuantity(q => q + 1)}>+</button>
+              </div>
             </div>
             <div className="cart-footer">
               <p><input type="checkbox" /> For ₹10.00 Please Wrap The Product</p>
@@ -263,19 +283,20 @@ const ProductDetails = () => {
             </div>
           </div>
         )}
+
         {showSignInModal && (
-        <div className="modal-overlay">
-          <div className="modal-box">
-            <FaTimes className="modal-close-icon" onClick={() => setShowSignInModal(false)} />
-            <FaLock size={40} className="modal-alert-icon" />
-            <h3>Sign In Required</h3>
-            <p>Please sign in to add items to your cart.</p>
-            <button className="modal-btn" onClick={() => navigate("/signin")}>
-              Sign In
-            </button>
+          <div className="modal-overlay">
+            <div className="modal-box">
+              <FaTimes className="modal-close-icon" onClick={() => setShowSignInModal(false)} />
+              <FaLock size={40} className="modal-alert-icon" />
+              <h3>Sign In Required</h3>
+              <p>Please sign in to add items to your cart.</p>
+              <button className="modal-btn" onClick={() => navigate("/signin")}>
+                Sign In
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
       <SpecialProduct />
       <DealsOfTheMonth />

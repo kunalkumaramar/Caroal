@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useUser } from "../context/UserContext";
+import { useSelector } from 'react-redux';
 import { FaRegUser, FaShoppingBag, FaBars, FaTimes } from "react-icons/fa";
-import { useCart } from "../context/CartContext";
 import "../styles/components/Header.css";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { currentUser } = useUser();
-  const { cartCount } = useCart();
+  const currentUser = useSelector(state => state.auth.user);
+
+  const cartItems = useSelector(state => state.cart.items); // from cartSlice
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0); // adjust based on item shape
+
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -19,15 +21,9 @@ const Header = () => {
         <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
         <Link to="/" state={{ scrollTo: "deals-section" }} onClick={() => setMenuOpen(false)}>Deals</Link>
         <Link to="/" state={{ scrollTo: "newarrivals" }} onClick={() => setMenuOpen(false)}>New Arrivals</Link>
-        <Link
-          to="/products"
-          className="nav-btn"
-          onClick={() => setMenuOpen(false)}
-        >
-          Products
-        </Link>
-        
+        <Link to="/products" className="nav-btn" onClick={() => setMenuOpen(false)}>Products</Link>
       </nav>
+
       <div className="auth-icons">
         {currentUser ? (
           <>
@@ -47,8 +43,6 @@ const Header = () => {
           {menuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
         </div>
       </div>
-
-    
     </header>
   );
 };

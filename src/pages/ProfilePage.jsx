@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useUser } from "../context/UserContext";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -9,9 +9,13 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 import { IoArrowBackCircleSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+import { logout, updateAddress, fetchProfile } from "../redux/authSlice";
+
 const ProfilePage = () => {
-  const { currentUser, logoutUser, updateShippingAddress } = useUser();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const currentUser = useSelector((state) => state.auth.user);
 
   const [view, setView] = useState("details");
   const [address, setAddress] = useState({
@@ -23,7 +27,11 @@ const ProfilePage = () => {
     state: "",
     isDefault: false,
   });
-
+  useEffect(() => {
+    if (!currentUser) {
+      dispatch(fetchProfile());
+    }
+  }, [dispatch, currentUser]);
   useEffect(() => {
     if (currentUser?.shippingAddress) {
       setAddress(currentUser.shippingAddress);
@@ -39,25 +47,25 @@ const ProfilePage = () => {
   };
 
   const handleSaveAddress = () => {
-  const requiredFields = [
-    "houseNumber",
-    "postalCode",
-    "addressLine1",
-    "city",
-    "state"
-  ];
+    const requiredFields = [
+      "houseNumber",
+      "postalCode",
+      "addressLine1",
+      "city",
+      "state"
+    ];
 
-  const isEmpty = requiredFields.some((field) => !address[field]?.trim());
+    const isEmpty = requiredFields.some((field) => !address[field]?.trim());
 
-  if (isEmpty) {
-    toast.error("Please fill in all required address fields.");
-    return;
-  }
+    if (isEmpty) {
+      toast.error("Please fill in all required address fields.");
+      return;
+    }
 
-  updateShippingAddress(address);
-  toast.success("Address saved successfully!");
+    dispatch(updateAddress(address));
+    toast.success("Address saved successfully!");
   };
- 
+
   const BackButton = () => (
     <button className="back-btn" onClick={() => setView("details")}>
       <IoArrowBackCircleSharp size={24} style={{ marginRight: 6 }} />
@@ -80,7 +88,7 @@ const ProfilePage = () => {
           <p>{currentUser.shippingAddress.addressLine2}</p>
           <p>{currentUser.shippingAddress.city}, {currentUser.shippingAddress.state} - {currentUser.shippingAddress.postalCode}</p>
         </div>
-        ) : (
+      ) : (
         <div className="no-address">
           <p>No default address added.</p>
           <button className="add-address-btn" onClick={() => setView("address")}>Add Address</button>
@@ -152,19 +160,21 @@ const ProfilePage = () => {
               <p className="sub">Add / Change Address</p>
             </div>
           </div>
-        <button
-        className="logout-btn"
-        onClick={() => {
-          logoutUser();
-          navigate("/signin", { replace: true }); // <-- 👈 replaces history entry
-        }}
-        >
-          Log Out
-        </button>
+          <button
+            className="logout-btn"
+            onClick={() => {
+              dispatch(logout());
+              navigate("/signin", { replace: true });
+            }}
+          >
+            Log Out
+          </button>
         </div>
-        {view === "orders" ? renderOrders() :
-         view === "address" ? renderAddressForm() :
-         renderDetails()}
+        {view === "orders"
+          ? renderOrders()
+          : view === "address"
+          ? renderAddressForm()
+          : renderDetails()}
       </div>
       <Footer />
     </>
