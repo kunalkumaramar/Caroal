@@ -112,7 +112,7 @@ const authSlice = createSlice({
   name: 'auth',
   initialState: {
     user: localStorage.getItem('user')
-      ? JSON.parse(localStorage.getItem('user'))
+      ? JSON.parse(null)
       : null,
     loading: false,
     error: null,
@@ -172,6 +172,7 @@ const authSlice = createSlice({
       .addCase(fetchProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        console.log("Fetched profile", action.payload);
         localStorage.setItem('user', JSON.stringify(action.payload)); 
       })
       .addCase(fetchProfile.rejected, (state, action) => {

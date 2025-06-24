@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCart,
   removeCartItem,
   updateCartItem
 } from "../redux/cartSlice";
+import { applyCoupon, clearAppliedCoupon } from "../redux/discountSlice";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/components/CartPage.css";
 import Header from "../components/Header";
@@ -16,11 +17,20 @@ const CartPage = () => {
   const navigate = useNavigate();
 
   const { items: cartItems, totals, loading } = useSelector((state) => state.cart);
+  const { appliedCoupon } = useSelector((state) => state.discount);
   const user = useSelector((state) => state.auth.user);
+
+  const [couponCode, setCouponCode] = useState("");
+  const [giftWrap, setGiftWrap] = useState(false);
 
   useEffect(() => {
     dispatch(fetchCart());
   }, [dispatch]);
+  useEffect(() => {
+  if (cartItems.length === 0 && appliedCoupon) {
+    dispatch(clearAppliedCoupon());
+  }
+}, [cartItems, appliedCoupon, dispatch]);
 
   const handleQuantityChange = (itemId, newQty) => {
     if (newQty < 1) return;
@@ -43,6 +53,44 @@ const CartPage = () => {
       navigate("/checkout");
     }
   };
+
+  const handleApplyCoupon = () => {
+    if (couponCode.trim()) {
+      dispatch(applyCoupon(couponCode.trim()));
+    }
+  };
+
+  // Coupon Discount Calculation
+  const subtotal = cartItems.reduce((acc, item) => {
+  const price = item.product?.price || 0;
+  const qty = item.quantity || 0;
+  return acc + price * qty;
+  }, 0);
+  let discountAmount = 0;
+
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === "percentage") {
+      if (subtotal >= appliedCoupon.minPurchase) {
+        discountAmount = (appliedCoupon.value / 100) * subtotal;
+      }
+    } else if (appliedCoupon.discountType === "buyXgetY") {
+      const applicableItems = cartItems.filter((item) =>
+        appliedCoupon.applicableCategories.includes(item.product?.categoryId)
+      );
+
+      let applicableQty = 0;
+      applicableItems.forEach((item) => {
+        applicableQty += item.quantity;
+      });
+
+      const freeItems = Math.floor(applicableQty / (appliedCoupon.buyX + appliedCoupon.getY)) * appliedCoupon.getY;
+      const itemPrice = applicableItems[0]?.product?.price || 0;
+      discountAmount = freeItems * itemPrice;
+    }
+  }
+
+  const giftWrapFee = giftWrap ? 10 : 0;
+  const finalTotal = subtotal - discountAmount + giftWrapFee;
 
   return (
     <>
@@ -103,25 +151,52 @@ const CartPage = () => {
                     </button>
                   </div>
 
-                  {/* 👇 Use item's backend-calculated total if available */}
-                  <span>₹{item.total?.toFixed(2) || "0.00"}</span>
+                  <span>₹{(item.product?.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>
 
             <div className="cart-summary-container">
               <div className="coupon-section">
-                <input type="text" placeholder="COUPON CODE" />
-                <button className="coupon-btn">View Offers</button>
+                <input
+                  type="text"
+                  placeholder="COUPON CODE"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                />
+                <button className="coupon-btn" onClick={handleApplyCoupon}>
+                  Apply Coupon
+                </button>
+
+                {appliedCoupon && (
+                  <p className="success-message">
+                    {appliedCoupon.code} applied —{" "}
+                    {appliedCoupon.discountType === "percentage"
+                      ? `${appliedCoupon.value}% OFF`
+                      : `Buy ${appliedCoupon.buyX} Get ${appliedCoupon.getY} FREE`}
+                  </p>
+                )}
+
                 <label className="gift-wrap">
-                  <input type="checkbox" /> For ₹10.00 Please Wrap The Product
+                  <input
+                    type="checkbox"
+                    checked={giftWrap}
+                    onChange={(e) => setGiftWrap(e.target.checked)}
+                  />
+                  For ₹10.00 Please Wrap The Product
                 </label>
               </div>
 
               <div className="cart-summary">
-                {/* 👇 Use backend-calculated subtotal */}
-                <p><strong>Subtotal:</strong> ₹{totals?.subtotal?.toFixed(2) || "0.00"}</p>
-                <button className="checkout-btn" onClick={handleCheckout}>Checkout</button>
+                <p><strong>Subtotal:</strong> ₹{subtotal.toFixed(2)}</p>
+                {discountAmount > 0 && (
+                  <p><strong>Discount:</strong> -₹{discountAmount.toFixed(2)}</p>
+                )}
+                {giftWrap && <p><strong>Gift Wrap:</strong> ₹10.00</p>}
+                <p><strong>Total:</strong> ₹{finalTotal.toFixed(2)}</p>
+                <button className="checkout-btn" onClick={handleCheckout}>
+                  Checkout
+                </button>
               </div>
             </div>
           </>

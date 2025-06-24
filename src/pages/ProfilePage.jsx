@@ -9,14 +9,17 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 import { IoArrowBackCircleSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { cancelOrder, updateOrderStatus, fetchOrderStats, fetchAllOrders } from '../redux/orderSlice';
 import { logout, updateAddress, fetchProfile } from "../redux/authSlice";
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const currentUser = useSelector((state) => state.auth.user);
-
+  const stats = useSelector((state) => state.order.stats);
+  console.log("Orders:", currentUser?.orders);
+  const orders = useSelector((state) => state.order.orders);
+  console.log("Orders:", currentUser?.orders);
   const [view, setView] = useState("details");
   const [address, setAddress] = useState({
     houseNumber: "",
@@ -27,11 +30,28 @@ const ProfilePage = () => {
     state: "",
     isDefault: false,
   });
+  const handleCancelOrder = (orderId) => {
+  dispatch(cancelOrder(orderId))
+    .unwrap()
+    .then(() => {
+      dispatch(updateOrderStatus({ orderId, status: 'cancelled' }));
+    })
+    .catch((err) => {
+      console.error("Cancel failed", err);
+    });
+};
   useEffect(() => {
     if (!currentUser) {
       dispatch(fetchProfile());
     }
   }, [dispatch, currentUser]);
+  useEffect(() => {
+  dispatch(fetchAllOrders());
+}, [dispatch]);
+
+  useEffect(() => {
+    dispatch(fetchOrderStats()); // 👈 fetch stats on mount
+  }, [dispatch]);
   useEffect(() => {
     if (currentUser?.shippingAddress) {
       setAddress(currentUser.shippingAddress);
@@ -98,22 +118,41 @@ const ProfilePage = () => {
   );
 
   const renderOrders = () => (
-    <div className="details-right">
-      <BackButton />
-      <h3>My Orders</h3>
-      {currentUser?.orders?.length ? (
-        currentUser.orders.map((order, idx) => (
-          <div key={idx} className="order-item">
-            <p><strong>Order ID:</strong> {order.id}</p>
-            <p><strong>Total:</strong> ₹{order.total}</p>
-            <p><strong>Date:</strong> {order.date}</p>
-          </div>
-        ))
+  <div className="details-right">
+    <BackButton />
+    <h3>My Orders</h3>
+    {orders?.length ? (
+    orders.map((order, idx) => (
+    <div key={idx} className="order-item">
+      <p><strong>Order Number:</strong> {order.orderNumber}</p>
+      <p><strong>Total:</strong> ₹{order.total}</p>
+      <p><strong>Status:</strong> {order.status}</p>
+      <p><strong>Items:</strong> {order.items?.length}</p>
+
+      {/* 👇 Add cancel button if status is 'pending' */}
+      {order.status === 'pending' ? (
+        <button onClick={() => handleCancelOrder(order._id)}>
+          Cancel Order
+        </button>
+      ) : order.status === 'cancelled' ? (
+        <p className="cancelled-status" style={{ color: 'red' }}>
+          Order Cancelled
+        </p>
       ) : (
-        <p>No orders placed yet.</p>
+        <p className="order-status" style={{ color: 'green' }}>
+          Status: {order.status}
+        </p>
       )}
+
     </div>
-  );
+  ))
+) : (
+  <p>No orders placed yet.</p>
+)}
+
+  </div>
+);
+
 
   const renderAddressForm = () => (
     <div className="details-right">

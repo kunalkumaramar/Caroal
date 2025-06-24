@@ -15,6 +15,7 @@ import MainLayout from './layouts/MainLayout';
 import { ToastContainer } from "react-toastify";
 
 import "./styles/global.css";
+import CheckoutPage from "./pages/CheckoutPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -42,6 +43,7 @@ function App() {
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/checkout" element={<CheckoutPage />}/>
         </Routes>
       </Router>
     </>

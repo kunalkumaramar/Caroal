@@ -9,8 +9,8 @@ import { loginUser } from '../redux/authSlice';
 const SignIn = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const clientId = "470840173572-uccvmrbffgfq4u39bkhpohsuugmh6s1b.apps.googleusercontent.com";
-  const redirectUri = "http://localhost:3000/Caroal/auth/google/callback";
+  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+  const redirectUri = process.env.REACT_APP_GOOGLE_REDIRECT_URI;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 

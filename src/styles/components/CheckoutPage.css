@@ -1,0 +1,46 @@
+.checkout-page {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.checkout-page h2 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.checkout-page p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.checkout-page strong {
+  color: #222;
+}
+
+.checkout-page button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: #111827;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+}
+
+.checkout-page button:hover {
+  background-color: #1f2937;
+}
