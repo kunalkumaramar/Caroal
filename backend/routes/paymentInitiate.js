@@ -31,14 +31,14 @@ router.post('/initiate', async (req, res) => {
     };
 
     const razorpayOrder = await razorpayInstance.orders.create(options);
-
+    console.log('🎯 Order total:', order.total, '| Amount in paise:', amountInPaise);
     // 3. Send necessary info to frontend
     res.status(200).json({
       success: true,
       payment: {
         orderId: order._id,
         user,
-        amount: order.total,
+        amount: amountInPaise,
         currency: 'INR',
         method,
       },
