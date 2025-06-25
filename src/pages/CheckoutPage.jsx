@@ -54,75 +54,85 @@ const CheckoutPage = () => {
       });
   };
 
-  const handleRazorpayPayment = async () => {
-    if (!user?.shippingAddress) {
-      toast.error('Shipping address is incomplete.');
-      return;
-    }
+ const handleRazorpayPayment = async () => {
+  if (!user?.shippingAddress) {
+    toast.error('Shipping address is incomplete.');
+    return;
+  }
 
-    const orderData = {
+  try {
+    // 1. Create Order
+    const createdOrder = await dispatch(placeOrder({
       ...baseOrderData,
-      paymentMethod: 'razorpay',
+      paymentMethod: 'razorpay'
+    })).unwrap();
+
+    if (!createdOrder?.orderId) throw new Error('Missing order ID');
+
+    // 2. Initiate Razorpay Payment
+    const paymentData = await dispatch(initiateRazorpay({
+      orderId: createdOrder.orderId,
+      userId: user._id
+    })).unwrap();
+
+    console.log("payment Data: ",paymentData);
+    
+
+
+    // 4. Configure Razorpay Options
+    const options = {
+      key: paymentData.key, // From backend response
+      amount: paymentData.order.amount, // Already in paise
+      currency: paymentData.order.currency || 'INR',
+      name: 'Your Store Name',
+      description: `${createdOrder.orderNumber}`,
+      order_id: paymentData.order.id, // Razorpay order ID
+      handler: async (response) => {
+        try {
+          await dispatch(handleRazorpaySuccess({
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature
+          })).unwrap();
+          
+          toast.success('Payment successful!');
+          navigate('/orders');
+        } catch (error) {
+          toast.error('Payment verification failed');
+        }
+      },
+      prefill: {
+        name: user.fullName,
+        email: user.email,
+        contact: user.phone
+      },
+      theme: {
+        color: '#3399cc'
+      }
     };
 
-    dispatch(placeOrder(orderData))
-      .unwrap()
-      .then((createdOrder) => {
-        const orderId = createdOrder?.orderId;
-        if (!orderId) throw new Error('Order ID missing for Razorpay');
+    console.log("options: ", options);
+    
 
-        dispatch(initiateRazorpay({ orderId, userId: user?._id }))
-          .unwrap()
-          .then((paymentData) => {
-            console.log("🔑 Razorpay Key:", process.env.REACT_APP_RAZORPAY_KEY);
-            console.log('✅ Flattened paymentData:', paymentData);
-            const options = {
-              key: process.env.REACT_APP_RAZORPAY_KEY, 
-              amount: paymentData.amount,
-              currency: paymentData.currency,
-              name: 'Caroal Store',
-              description: 'Order Payment',
-              order_id: paymentData.razorpayOrderId,
-              handler: function (response) {
-                console.log("🎯 Razorpay Response", response);
-                const paymentDetails = {
-                  razorpayOrderId: response.razorpay_order_id,
-                  razorpayPaymentId: response.razorpay_payment_id,
-                  razorpaySignature: response.razorpay_signature,
-                  razorpayPayment: {
-                    amount: paymentData.amount,
-                    currency: paymentData.currency,
-                    status: 'captured',
-                  },
-                };
+    // 5. Add error handlers
+    options.modal = {
+      ondismiss: () => {
+        toast.info('Payment window closed');
+      }
+    };
 
-                dispatch(handleRazorpaySuccess(paymentDetails))
-                  .unwrap()
-                  .then(() => {
-                    dispatch(fetchProfile());
-                    toast.success('Payment successful!');
-                    navigate('/profile');
-                  })
-                  .catch(() => toast.error('Failed to verify Razorpay payment.'));
-              },
-              theme: {
-                color: '#3399cc',
-              },
-            };
+    // 6. Open Razorpay
+    const rzp = new window.Razorpay(options);
+    rzp.on('payment.failed', (response) => {
+      toast.error(`Payment failed: ${response.error.description}`);
+    });
+    rzp.open();
 
-            const rzp = new window.Razorpay(options);
-            rzp.open();
-          })
-          .catch((err) => {
-            toast.error('Razorpay initiation failed.');
-            console.error(err);
-          });
-      })
-      .catch((err) => {
-        toast.error('Order creation failed for Razorpay.');
-        console.error(err);
-      });
-  };
+  } catch (error) {
+    console.error('Payment error:', error);
+    toast.error(error.message || 'Payment processing failed');
+  }
+};
 
   return (
     <div className="checkout-page">
