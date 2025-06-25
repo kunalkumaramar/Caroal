@@ -14,12 +14,11 @@ import store from './redux/store'; // Make sure this file exists and exports a v
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
-  <React.StrictMode>
+
     <Provider store={store}>
       <App />
       <ToastContainer />
     </Provider>
-  </React.StrictMode>
 );
 
 reportWebVitals();

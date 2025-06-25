@@ -124,9 +124,13 @@ const authSlice = createSlice({
       state.user = null;
       toast.info('Logged out');
     },
+    restoreUser: (state, action) => {
+    state.user = action.payload;
+    },
     updateAddress: (state, action) => {
       if (state.user) {
         state.user.shippingAddress = action.payload;
+        localStorage.setItem('user', JSON.stringify(state.user));
         toast.success('Address updated');
       } else {
         toast.error('No user logged in');
@@ -143,7 +147,6 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        localStorage.setItem('user', JSON.stringify(action.payload)); // 👈 save user
       })
 
       .addCase(loginUser.rejected, (state, action) => {
@@ -172,8 +175,7 @@ const authSlice = createSlice({
       .addCase(fetchProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        console.log("Fetched profile", action.payload);
-        localStorage.setItem('user', JSON.stringify(action.payload)); 
+        console.log("Fetched profile", action.payload); 
       })
       .addCase(fetchProfile.rejected, (state, action) => {
         state.loading = false;
@@ -187,7 +189,6 @@ const authSlice = createSlice({
       .addCase(googleLogin.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
-        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(googleLogin.rejected, (state, action) => {
         state.loading = false;

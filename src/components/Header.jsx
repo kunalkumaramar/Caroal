@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { FaRegUser, FaShoppingBag, FaBars, FaTimes } from "react-icons/fa";
@@ -6,12 +6,23 @@ import "../styles/components/Header.css";
 
 const Header = () => {
   const navigate = useNavigate();
-  const currentUser = useSelector(state => state.auth.user);
+  const reduxUser = useSelector(state => state.auth.user);
+  const cartItems = useSelector(state => state.cart.items);
 
-  const cartItems = useSelector(state => state.cart.items); // from cartSlice
-  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0); // adjust based on item shape
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  });
+
+  // Sync with Redux on update
+  useEffect(() => {
+    if (reduxUser) {
+      setUser(reduxUser);
+    }
+  }, [reduxUser]);
 
   return (
     <header className="header">
@@ -25,7 +36,7 @@ const Header = () => {
       </nav>
 
       <div className="auth-icons">
-        {currentUser ? (
+        {user ? (
           <>
             <FaRegUser className="nav-icon" onClick={() => navigate("/profile")} />
             <div className="cart-icon-wrapper" onClick={() => navigate("/cart")}>

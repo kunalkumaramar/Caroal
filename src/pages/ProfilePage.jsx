@@ -40,11 +40,12 @@ const ProfilePage = () => {
       console.error("Cancel failed", err);
     });
 };
-  useEffect(() => {
-    if (!currentUser) {
-      dispatch(fetchProfile());
-    }
-  }, [dispatch, currentUser]);
+ useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (!currentUser && token) {
+    dispatch(fetchProfile());
+  }
+}, [dispatch, currentUser]);
   useEffect(() => {
   dispatch(fetchAllOrders());
 }, [dispatch]);

@@ -18,7 +18,8 @@ const GoogleCallback = () => {
       dispatch(googleLogin(code))
         .unwrap()
         .then(() => {
-          console.log("Google login successful");
+          const updatedUser = JSON.parse(localStorage.getItem("user"));
+          dispatch({ type: "auth/restoreUser", payload: updatedUser });
           navigate("/", { replace: true }); // ✅ Redirect to home and remove ?code= from URL
         })
         .catch((error) => {
