@@ -17,9 +17,9 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const currentUser = useSelector((state) => state.auth.user);
   const stats = useSelector((state) => state.order.stats);
-  console.log("Orders:", currentUser?.orders);
+  // console.log("Orders:", currentUser?.orders);
   const orders = useSelector((state) => state.order.orders);
-  console.log("Orders:", currentUser?.orders);
+  // console.log("Orders:", currentUser?.orders);
   const [view, setView] = useState("details");
   const [address, setAddress] = useState({
     houseNumber: "",

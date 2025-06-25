@@ -54,7 +54,8 @@ const CheckoutPage = () => {
       });
   };
 
- const handleRazorpayPayment = async () => {
+// checkout.jsx - Minor fixes
+const handleRazorpayPayment = async () => {
   if (!user?.shippingAddress) {
     toast.error('Shipping address is incomplete.');
     return;
@@ -70,35 +71,45 @@ const CheckoutPage = () => {
     if (!createdOrder?.orderId) throw new Error('Missing order ID');
 
     // 2. Initiate Razorpay Payment
-    const paymentData = await dispatch(initiateRazorpay({
+    const paymentResponse = await dispatch(initiateRazorpay({
       orderId: createdOrder.orderId,
       userId: user._id
     })).unwrap();
 
-    console.log("payment Data: ",paymentData);
+    // Fix: Better error handling for nested response
+    const paymentData = paymentResponse?.data || paymentResponse;
     
+    if (!paymentData?.key || !paymentData?.order) {
+      throw new Error('Invalid payment response structure');
+    }
+    
+    console.log("Payment data:", paymentData);
 
-
-    // 4. Configure Razorpay Options
+    // 3. Configure Razorpay Options
     const options = {
-      key: paymentData.key, // From backend response
-      amount: paymentData.order.amount, // Already in paise
+      key: paymentData.key,
+      amount: paymentData.order.amount,
       currency: paymentData.order.currency || 'INR',
       name: 'Your Store Name',
-      description: `${createdOrder.orderNumber}`,
-      order_id: paymentData.order.id, // Razorpay order ID
+      description: `Order #${createdOrder.orderNumber}`,
+      order_id: paymentData.order.id,
       handler: async (response) => {
         try {
+          console.log('Razorpay response:', response); // Debug log
+          
           await dispatch(handleRazorpaySuccess({
             razorpayOrderId: response.razorpay_order_id,
             razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature
+            razorpaySignature: response.razorpay_signature,
+            amount: paymentData.order.amount // Add this line
           })).unwrap();
           
           toast.success('Payment successful!');
+          dispatch(fetchProfile()); // Refresh user data
           navigate('/orders');
         } catch (error) {
-          toast.error('Payment verification failed');
+          console.error('Payment verification error:', error);
+          toast.error(error.message || 'Payment verification failed');
         }
       },
       prefill: {
@@ -108,24 +119,22 @@ const CheckoutPage = () => {
       },
       theme: {
         color: '#3399cc'
+      },
+      modal: {
+        ondismiss: () => {
+          toast.info('Payment cancelled');
+        }
       }
     };
 
-    console.log("options: ", options);
-    
-
-    // 5. Add error handlers
-    options.modal = {
-      ondismiss: () => {
-        toast.info('Payment window closed');
-      }
-    };
-
-    // 6. Open Razorpay
+    // 4. Open Razorpay
     const rzp = new window.Razorpay(options);
+    
     rzp.on('payment.failed', (response) => {
-      toast.error(`Payment failed: ${response.error.description}`);
+      console.error('Payment failed:', response.error);
+      toast.error(`Payment failed: ${response.error.description || 'Unknown error'}`);
     });
+    
     rzp.open();
 
   } catch (error) {

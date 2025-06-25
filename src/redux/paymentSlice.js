@@ -38,15 +38,22 @@ export const handleRazorpaySuccess = createAsyncThunk(
   'payment/success',
   async (razorpayResponse, thunkAPI) => {
     try {
-      console.log('📤 Sending to /payments/success:', razorpayResponse);
-      const res = await fetch(`${BASE_URL}/payments/success`, {
+      console.log('📤 Sending to payments/success:', razorpayResponse);
+      const res = await fetch(`${BASE_URL}/payments/success`, { // Changed endpoint
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(razorpayResponse),
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token()}` // Added auth header
+        },
+        body: JSON.stringify({
+          razorpay_order_id: razorpayResponse.razorpayOrderId,
+          razorpay_payment_id: razorpayResponse.razorpayPaymentId,
+          razorpay_signature: razorpayResponse.razorpaySignature
+        }),
       });
 
       const data = await res.json();
-      console.log('📥 Response from /payments/success:', data);
+      console.log('📥 Response from /success:', data);
       if (res.ok) {
         toast.success('Payment verified successfully');
         return data;
@@ -60,7 +67,6 @@ export const handleRazorpaySuccess = createAsyncThunk(
     }
   }
 );
-
 // 🔹 Payment Slice (Optional)
 const paymentSlice = createSlice({
   name: 'payment',
