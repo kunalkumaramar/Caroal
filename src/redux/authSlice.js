@@ -68,6 +68,7 @@ export const fetchProfile = createAsyncThunk(
       });
       const data = await res.json();
       if (res.ok) {
+        console.log('👤 Profile fetched:', data.data);
         return data.data;
       } else {
         toast.error(data.message || 'Unauthorized');
@@ -106,6 +107,39 @@ export const googleLogin = createAsyncThunk(
     }
   }
 );
+// UPDATE ADDRESS
+export const updateAddress = createAsyncThunk(
+  'auth/updateAddress',
+  async ({ addresses, phone }, thunkAPI) => {
+    try {
+      console.log('📦 Sending to backend:',  phone );
+      const res = await fetch(`${BASE_URL}/auth/profile`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ addresses, phone }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data?.data) {
+        console.log('✅ Response from backend:', data.data);
+        toast.success('Profile updated successfully!');
+        return data.data;
+      } else {
+        console.error('❌ Backend error:', data.message);
+        toast.error(data.message || 'Failed to update profile');
+        return thunkAPI.rejectWithValue(data.message);
+      }
+    } catch (err) {
+      console.error('❌ Network error:', err.message);
+      toast.error(err.message || 'Server error');
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
 
 // SLICE
 const authSlice = createSlice({
@@ -126,15 +160,6 @@ const authSlice = createSlice({
     },
     restoreUser: (state, action) => {
     state.user = action.payload;
-    },
-    updateAddress: (state, action) => {
-      if (state.user) {
-        state.user.shippingAddress = action.payload;
-        localStorage.setItem('user', JSON.stringify(state.user));
-        toast.success('Address updated');
-      } else {
-        toast.error('No user logged in');
-      }
     },
   },
   extraReducers: (builder) => {
@@ -174,9 +199,12 @@ const authSlice = createSlice({
       })
       .addCase(fetchProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
-        console.log("Fetched profile", action.payload); 
+        state.user = {
+          ...action.payload,
+          shippingAddress: action.payload.addresses?.find(addr => addr.isDefault) || action.payload.addresses?.[0] || null,
+        };
       })
+
       .addCase(fetchProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -193,9 +221,23 @@ const authSlice = createSlice({
       .addCase(googleLogin.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      //UPDATE ADDRESS
+      .addCase(updateAddress.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateAddress.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload; // ✅ set full user object returned from backend
+      })
+      .addCase(updateAddress.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { logout, updateAddress } = authSlice.actions;
+export const { logout, restoreUser } = authSlice.actions;
 export default authSlice.reducer;

@@ -185,10 +185,10 @@ dispatch(addToCart(payload));
           </div>
 
           <div className="price-section">
-            <span className="current-price">{product.price}</span>
+            <span className="current-price"> ₹{product.price}</span>
             {product.originalPrice && (
               <>
-                <span className="original-price">{product.originalPrice}</span>
+                <span className="original-price"> ₹{product.originalPrice}</span>
                 <span className="discount">Save 33%</span>
               </>
             )}
@@ -262,7 +262,6 @@ dispatch(addToCart(payload));
               <h2>Shopping Cart</h2>
               <FaTimes onClick={handleCloseCart} className="close-icon" />
             </div>
-            <p>Buy <strong>₹122.35</strong> more and get <strong>Free Shipping</strong></p>
             <div className="cart-item">
               <img src={selectedImg} alt="cart-product" />
               <div>
@@ -276,7 +275,6 @@ dispatch(addToCart(payload));
               </div>
             </div>
             <div className="cart-footer">
-              <p><input type="checkbox" /> For ₹10.00 Please Wrap The Product</p>
               <p><strong>Subtotal:</strong> ₹{(cleanPrice * quantity).toFixed(2)}</p>
               <button className="checkout-btn" onClick={handleCheckout}>Checkout</button>
               <button className="view-cart-btn" onClick={() => navigate('/cart')}>View Cart</button>

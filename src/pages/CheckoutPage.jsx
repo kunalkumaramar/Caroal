@@ -1,4 +1,4 @@
-import React from 'react';
+import {useRef} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { placeOrder } from '../redux/orderSlice';
 import { fetchProfile } from '../redux/authSlice';
@@ -9,6 +9,7 @@ import '../styles/components/CheckoutPage.css';
 
 const CheckoutPage = () => {
   const dispatch = useDispatch();
+  const placingRef = useRef(false);
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const totals = useSelector((state) => state.cart.totals);
@@ -19,7 +20,7 @@ const CheckoutPage = () => {
     addressLine2: address?.addressLine2 || '',
     city: address?.city || '',
     state: address?.state || '',
-    pinCode: address?.postalCode || '',
+    pinCode: address?.pinCode,
     country: 'India',
     phone: user?.phone || fallbackPhone,
   });
@@ -30,29 +31,44 @@ const CheckoutPage = () => {
     notes: 'Please deliver between 10am-5pm',
   };
 
-  const handleCOD = () => {
-    if (!user?.shippingAddress) {
-      toast.error('Shipping address is incomplete.');
-      return;
-    }
+ const handleCOD = () => {
+  if (placingRef.current) return;
+  placingRef.current = true;
 
-    const orderData = {
-      ...baseOrderData,
-      paymentMethod: 'cod',
-    };
+  if (!user?.shippingAddress) {
+    toast.error('Shipping address is incomplete.');
+    placingRef.current = false;
+    return;
+  }
+  if (!user?.shippingAddress?.pinCode) {
+    toast.error('Shipping pincode is missing');
+    placingRef.current = false;
+  return;
+  }
 
-    dispatch(placeOrder(orderData))
-      .unwrap()
-      .then(() => {
-        dispatch(fetchProfile());
-        toast.success('Order placed successfully!');
-        navigate('/profile');
-      })
-      .catch((err) => {
-        console.error('Order placement error:', err);
-        toast.error('Something went wrong while placing the order.');
-      });
+  const orderData = {
+    ...baseOrderData,
+    paymentMethod: 'cod',
+    items: cartItems.map((item) => ({
+      productId: item.product?._id || item.productId,
+      quantity: item.quantity,
+    })),
   };
+
+  dispatch(placeOrder(orderData))
+    .unwrap()
+    .then(() => {
+      dispatch(fetchProfile());
+      navigate('/profile');
+    })
+    .catch((err) => {
+      console.error('Order placement error:', err);
+      toast.error(err.message || 'Something went wrong while placing the order.');
+    })
+    .finally(() => {
+      placingRef.current = false;
+    });
+};
 
 // checkout.jsx - Minor fixes
 const handleRazorpayPayment = async () => {
@@ -90,7 +106,7 @@ const handleRazorpayPayment = async () => {
       key: paymentData.key,
       amount: paymentData.order.amount,
       currency: paymentData.order.currency || 'INR',
-      name: 'Your Store Name',
+      name: 'Caroal Store',
       description: `Order #${createdOrder.orderNumber}`,
       order_id: paymentData.order.id,
       handler: async (response) => {
@@ -106,7 +122,7 @@ const handleRazorpayPayment = async () => {
           
           toast.success('Payment successful!');
           dispatch(fetchProfile()); // Refresh user data
-          navigate('/orders');
+          navigate('/profile');
         } catch (error) {
           console.error('Payment verification error:', error);
           toast.error(error.message || 'Payment verification failed');
@@ -147,15 +163,32 @@ const handleRazorpayPayment = async () => {
     <div className="checkout-page">
       <h2>Checkout</h2>
       <p>
-        <strong>Shipping to:</strong>{' '}
-        {user?.shippingAddress?.addressLine1}, {user?.shippingAddress?.city}
+        <strong>Shipping to:</strong>{" "}
+        {[user?.shippingAddress?.addressLine1,
+          user?.shippingAddress?.addressLine2,
+          user?.shippingAddress?.city,
+          user?.shippingAddress?.state]
+          .filter(Boolean)
+          .join(", ")}{" "}
+        - {user?.shippingAddress?.pinCode}
       </p>
+
       <p>
-      <strong>Total:</strong> ₹{(totals?.subtotal ?? cartItems.reduce((acc, item) => {
-          const price = item.product?.price || 0;
-          const qty = item.quantity || 0;
-          return acc + price * qty;
-        }, 0)).toFixed(2)}
+        <strong>Total:</strong> ₹{(() => {
+          const subtotal = totals?.subtotal ?? cartItems.reduce((acc, item) => {
+            const price = item.product?.price || 0;
+            const qty = item.quantity || 0;
+            return acc + price * qty;
+          }, 0);
+
+          const discount = totals?.discountAmount || 0;
+          const shippingCharge = 10;
+          const taxableAmount = subtotal - discount + shippingCharge;
+          const tax = Math.round(0.18 * taxableAmount);
+          const finalTotal = (taxableAmount + tax).toFixed(2);
+
+          return finalTotal;
+        })()}
       </p>
 
       <button onClick={handleCOD}>Cash on Delivery</button>

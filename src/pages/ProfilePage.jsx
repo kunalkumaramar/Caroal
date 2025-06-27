@@ -21,9 +21,10 @@ const ProfilePage = () => {
   const orders = useSelector((state) => state.order.orders);
   // console.log("Orders:", currentUser?.orders);
   const [view, setView] = useState("details");
+  const [phoneInput, setPhoneInput] = useState(currentUser?.phone || "");
   const [address, setAddress] = useState({
     houseNumber: "",
-    postalCode: "",
+    pinCode: "",
     addressLine1: "",
     addressLine2: "",
     city: "",
@@ -32,13 +33,16 @@ const ProfilePage = () => {
   });
   const handleCancelOrder = (orderId) => {
   dispatch(cancelOrder(orderId))
-    .unwrap()
-    .then(() => {
-      dispatch(updateOrderStatus({ orderId, status: 'cancelled' }));
-    })
-    .catch((err) => {
-      console.error("Cancel failed", err);
-    });
+  .unwrap()
+  .then(() => {
+    //toast.success("Order cancelled");
+    // Order status already updated via backend
+    dispatch(fetchAllOrders());
+  })
+  .catch((err) => {
+    toast.error("Failed to cancel order");
+    console.error(err);
+  });
 };
  useEffect(() => {
   const token = localStorage.getItem('token');
@@ -49,13 +53,26 @@ const ProfilePage = () => {
   useEffect(() => {
   dispatch(fetchAllOrders());
 }, [dispatch]);
+useEffect(() => {
+  if (currentUser?.phone) {
+    setPhoneInput(currentUser.phone);
+  }
+}, [currentUser?.phone]);
 
   useEffect(() => {
     dispatch(fetchOrderStats()); // 👈 fetch stats on mount
   }, [dispatch]);
   useEffect(() => {
     if (currentUser?.shippingAddress) {
-      setAddress(currentUser.shippingAddress);
+      setAddress({
+        houseNumber: currentUser.shippingAddress?.addressLine1?.split(",")[0] || "",
+        pinCode: currentUser.shippingAddress?.pinCode || "",
+        addressLine1: currentUser.shippingAddress?.addressLine1?.split(",").slice(1).join(",").trim() || "",
+        addressLine2: currentUser.shippingAddress?.addressLine2 || "",
+        city: currentUser.shippingAddress?.city || "",
+        state: currentUser.shippingAddress?.state || "",
+        isDefault: currentUser.shippingAddress?.isDefault || false,
+      });
     }
   }, [currentUser]);
 
@@ -67,24 +84,46 @@ const ProfilePage = () => {
     }));
   };
 
-  const handleSaveAddress = () => {
-    const requiredFields = [
-      "houseNumber",
-      "postalCode",
-      "addressLine1",
-      "city",
-      "state"
-    ];
+const handleSaveAddress = () => {
+  const requiredFields = [
+    "houseNumber",
+    "pinCode",
+    "addressLine1",
+    "city",
+    "state"
+  ];
 
-    const isEmpty = requiredFields.some((field) => !address[field]?.trim());
+  const isEmpty = requiredFields.some((field) => !address[field]?.trim());
 
-    if (isEmpty) {
-      toast.error("Please fill in all required address fields.");
-      return;
-    }
+  if (isEmpty) {
+    toast.error("Please fill in all required address fields.");
+    return;
+  }
 
-    dispatch(updateAddress(address));
-    toast.success("Address saved successfully!");
+  const formattedAddress = {
+    name: "Home",
+    addressLine1: `${address.houseNumber}, ${address.addressLine1}`,
+    addressLine2: address.addressLine2 || "",
+    city: address.city,
+    state: address.state,
+    pinCode: address.pinCode,
+    isDefault: address.isDefault
+  };
+
+  const updatedAddresses = (currentUser?.addresses || [])
+      .filter((a) => !a.isDefault) // remove old default
+      .concat(formattedAddress); // add new one
+
+    dispatch(updateAddress({ addresses: updatedAddresses, phone: phoneInput }))
+      .unwrap()
+      .then(() => {
+        dispatch(fetchProfile());
+        toast.success("Address saved!");
+        setView("details");
+      })
+      .catch(() => {
+        toast.error("Failed to save address");
+      });
   };
 
   const BackButton = () => (
@@ -100,21 +139,28 @@ const ProfilePage = () => {
       <div className="user-info">
         <p><strong>Name:</strong> {currentUser?.firstName} {currentUser?.lastName}</p>
         <p><strong>Email:</strong> {currentUser?.email}</p>
-        <p><strong>Phone:</strong> {currentUser?.phone}</p>
+        <p><strong>Phone:</strong> {currentUser?.phone || (
+          <span style={{ color: 'red', cursor: 'pointer' }} onClick={() => setView("phone")}>
+            Not Provided (Click to Add)
+          </span>
+        )}</p>
       </div>
       <h4 className="h">Default Address</h4>
-      {currentUser?.shippingAddress ? (
-        <div className="address-card">
-          <p>{currentUser.shippingAddress.houseNumber}, {currentUser.shippingAddress.addressLine1}</p>
-          <p>{currentUser.shippingAddress.addressLine2}</p>
-          <p>{currentUser.shippingAddress.city}, {currentUser.shippingAddress.state} - {currentUser.shippingAddress.postalCode}</p>
-        </div>
+      {currentUser?.addresses?.length ? (
+        currentUser.addresses
+          .filter(addr => addr.isDefault)
+          .map((addr, index) => (
+            <div key={index} className="address-card">
+              <p>{addr.addressLine1}, {addr.addressLine2}</p>
+              <p>{addr.city}, {addr.state} - {addr.pinCode}</p>
+            </div>
+          ))
       ) : (
-        <div className="no-address">
-          <p>No default address added.</p>
-          <button className="add-address-btn" onClick={() => setView("address")}>Add Address</button>
-        </div>
-      )}
+            <div className="no-address">
+              <p>No default address added.</p>
+              <button className="add-address-btn" onClick={() => setView("address")}>Add Address</button>
+            </div>
+          )}
     </div>
   );
 
@@ -161,7 +207,7 @@ const ProfilePage = () => {
       <h3>Edit Address</h3>
       <div className="form-grid">
         <input name="houseNumber" placeholder="House Number" value={address.houseNumber} onChange={handleAddressChange} />
-        <input name="postalCode" placeholder="Postal Code" value={address.postalCode} onChange={handleAddressChange} />
+        <input name="pinCode" placeholder="Postal Code" value={address.pinCode} onChange={handleAddressChange} />
         <input name="addressLine1" placeholder="Address Line 1" value={address.addressLine1} onChange={handleAddressChange} />
         <input name="addressLine2" placeholder="Address Line 2" value={address.addressLine2} onChange={handleAddressChange} />
         <input name="city" placeholder="City" value={address.city} onChange={handleAddressChange} />
@@ -179,6 +225,44 @@ const ProfilePage = () => {
       <button className="save-btn" onClick={handleSaveAddress}>Save Changes</button>
     </div>
   );
+  const handlePhoneUpdate = () => {
+  if (!phoneInput.trim() || phoneInput.length < 10) {
+    toast.error("Please enter a valid phone number.");
+    return;
+  }
+
+  const updatedUser = {
+    ...currentUser,
+    phone: phoneInput.trim()
+  };
+
+  dispatch(updateAddress({
+  addresses: currentUser.addresses || [],
+  phone: phoneInput.trim()
+  })) 
+    .then(() => {
+      dispatch(fetchProfile());
+      toast.success("Phone number updated!");
+      setView("details");
+    })
+    .catch(() => toast.error("Failed to update phone number."));
+};
+
+const renderPhoneForm = () => (
+  <div className="details-right">
+    <BackButton />
+    <h3>Update Phone Number</h3>
+    <input
+      type="tel"
+      className="phone"
+      value={phoneInput}
+      onChange={(e) => setPhoneInput(e.target.value)}
+      placeholder="Enter your phone number"
+    />
+    <button className="save-btn" onClick={handlePhoneUpdate}>Save</button>
+  </div>
+);
+
 
   return (
     <>
@@ -214,6 +298,8 @@ const ProfilePage = () => {
           ? renderOrders()
           : view === "address"
           ? renderAddressForm()
+          : view === "phone"
+          ? renderPhoneForm()
           : renderDetails()}
       </div>
       <Footer />

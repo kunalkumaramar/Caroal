@@ -180,6 +180,11 @@
   color: #FFA500; 
   margin-right: 12px; 
 }
+.phone{
+  padding: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
 @media (max-width: 768px) {
   .profile-page-container {
     flex-direction: column;

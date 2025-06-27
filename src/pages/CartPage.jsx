@@ -21,7 +21,6 @@ const CartPage = () => {
   const user = useSelector((state) => state.auth.user);
 
   const [couponCode, setCouponCode] = useState("");
-  const [giftWrap, setGiftWrap] = useState(false);
 
   useEffect(() => {
     dispatch(fetchCart());
@@ -46,13 +45,13 @@ const CartPage = () => {
   };
 
   const handleCheckout = () => {
-    if (!user || !user.shippingAddress || !user.shippingAddress.city) {
-      toast.info("Please add your address to proceed.");
-      navigate("/profile");
-    } else {
-      navigate("/checkout");
-    }
-  };
+  if (!user || !user.addresses || user.addresses.length === 0 || !user.addresses[0].city) {
+    toast.info("Please add your address to proceed.");
+    navigate("/profile");
+  } else {
+    navigate("/checkout");
+  }
+};
 
   const handleApplyCoupon = () => {
     if (couponCode.trim()) {
@@ -89,8 +88,11 @@ const CartPage = () => {
     }
   }
 
-  const giftWrapFee = giftWrap ? 10 : 0;
-  const finalTotal = subtotal - discountAmount + giftWrapFee;
+ const shippingCharge = 10;
+ const taxableAmount = subtotal - discountAmount + shippingCharge;
+ const taxAmount = Math.round(0.18 * taxableAmount);
+ const finalTotal = parseFloat((taxableAmount + taxAmount).toFixed(2));
+
 
   return (
     <>
@@ -176,24 +178,22 @@ const CartPage = () => {
                       : `Buy ${appliedCoupon.buyX} Get ${appliedCoupon.getY} FREE`}
                   </p>
                 )}
-
-                <label className="gift-wrap">
-                  <input
-                    type="checkbox"
-                    checked={giftWrap}
-                    onChange={(e) => setGiftWrap(e.target.checked)}
-                  />
-                  For ₹10.00 Please Wrap The Product
-                </label>
               </div>
 
               <div className="cart-summary">
-                <p><strong>Subtotal:</strong> ₹{subtotal.toFixed(2)}</p>
-                {discountAmount > 0 && (
-                  <p><strong>Discount:</strong> -₹{discountAmount.toFixed(2)}</p>
-                )}
-                {giftWrap && <p><strong>Gift Wrap:</strong> ₹10.00</p>}
-                <p><strong>Total:</strong> ₹{finalTotal.toFixed(2)}</p>
+                <p><strong>Items Total:</strong> ₹{subtotal.toFixed(2)}</p>
+
+                 {discountAmount > 0 && (
+                   <p><strong>Discount:</strong> -₹{discountAmount.toFixed(2)}</p>
+                 )}
+
+                 <p><strong>Shipping Charges:</strong> ₹{shippingCharge.toFixed(2)}</p>
+                 <p><strong>GST (18%):</strong> ₹{taxAmount.toFixed(2)}</p>
+
+                 <hr />
+
+                 <p><strong>Subtotal (Payable):</strong> ₹{finalTotal.toFixed(2)}</p>
+
                 <button className="checkout-btn" onClick={handleCheckout}>
                   Checkout
                 </button>

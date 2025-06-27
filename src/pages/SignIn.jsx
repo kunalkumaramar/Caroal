@@ -80,8 +80,6 @@ const SignIn = () => {
             </form>
 
             {error && <p className="error-message">{error}</p>}
-
-            <div className="extra-links"><a href="#">Forget Password?</a></div>
             <div className="terms">CAROAL Terms & Conditions</div>
           </div>
         </div>
