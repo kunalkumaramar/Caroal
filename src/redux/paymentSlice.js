@@ -55,7 +55,6 @@ export const handleRazorpaySuccess = createAsyncThunk(
       const data = await res.json();
       console.log('📥 Response from /success:', data);
       if (res.ok) {
-        toast.success('Payment verified successfully');
         return data;
       } else {
         toast.error(data.message || 'Payment verification failed');
