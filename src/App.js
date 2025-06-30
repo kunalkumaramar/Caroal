@@ -31,7 +31,7 @@ function App() {
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      <Router basename="/Caroal">
+      <Router basename="/">
         <Routes>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
