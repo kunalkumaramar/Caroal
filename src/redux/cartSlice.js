@@ -146,7 +146,14 @@ const cartSlice = createSlice({
     loading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    setCartItems: (state, action) => {
+    state.items = action.payload;
+    },
+    setTotals: (state, action) => {
+    state.totals = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     const loading = (state) => { state.loading = true; state.error = null; };
     const failed = (state, action) => { state.loading = false; state.error = action.payload; };
@@ -197,5 +204,5 @@ const cartSlice = createSlice({
       .addCase(clearCart.rejected, failed);
   },
 });
-
+export const { setCartItems, setTotals } = cartSlice.actions;
 export default cartSlice.reducer;

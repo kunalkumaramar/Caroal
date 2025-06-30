@@ -174,7 +174,12 @@
   transition: all 0.2s;
 }
 
-.size-btn:hover {
+.size-btn:hover{
+  border-color: black;
+}
+.size-btn.selected{
+  background-color: black;
+  color: white;
   border-color: black;
 }
 

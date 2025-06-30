@@ -151,7 +151,7 @@ const productSlice = createSlice({
       .addCase(getProductsByCategory.rejected, (s, a) => { s.loading = false; s.error = a.payload; })
 
       .addCase(getProductSizes.pending, (s) => { s.loading = true; s.error = null; })
-      .addCase(getProductSizes.fulfilled, (s, a) => { s.loading = false; s.sizes = a.payload; })
+      .addCase(getProductSizes.fulfilled, (s, a) => {s.loading = false;s.sizes = a.payload?.data?.map(item => item.size) || []; })
       .addCase(getProductSizes.rejected, (s, a) => { s.loading = false; s.error = a.payload; })
 
       .addCase(createProduct.pending, (s) => { s.loading = true; s.error = null; })

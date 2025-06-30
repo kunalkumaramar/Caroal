@@ -181,3 +181,65 @@
 .breadcrumb2-link:hover {
   text-decoration: underline;
 }
+.policy-container {
+  margin-top: 50px;
+  text-align: center;
+  padding-bottom: 50px;
+}
+
+.policy-section {
+  margin-bottom: 20px;
+}
+
+.policy-header {
+  background-color: transparent;
+  color: black;
+  font-size: 18px;
+  font-weight: 600;
+  border: 2px solid black;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.policy-header:hover {
+  background-color: black;
+  color: white;
+}
+
+.policy-content {
+  max-width: 700px;
+  margin: 15px auto 0 auto;
+  padding: 15px 20px;
+  background-color: #f9f9f9;
+  color: #333;
+  border-left: 4px solid black;
+  border-radius: 8px;
+  text-align: left;
+  animation: dropdown 0.3s ease-in-out;
+}
+.policy-content ul {
+  padding-left: 20px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  list-style: disc;
+}
+
+.policy-content p {
+  margin-bottom: 10px;
+}
+
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

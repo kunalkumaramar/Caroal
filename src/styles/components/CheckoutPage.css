@@ -44,3 +44,127 @@
 .checkout-page button:hover {
   background-color: #1f2937;
 }
+.product-summary {
+  margin-bottom: 20px;
+  background: #fafafa;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.product-img {
+  width: 70px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.product-title {
+  font-weight: 600;
+  margin: 0;
+}
+
+.product-color,
+.product-price {
+  font-size: 14px;
+  color: #555;
+}
+.checkout-product {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: #f9f9f9;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.checkout-product-img {
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.checkout-product-price {
+  font-size: 16px;
+  font-weight: 500;
+}
+.policy-container {
+  margin-top: 50px;
+  text-align: center;
+  padding-bottom: 50px;
+}
+
+.policy-section {
+  margin-bottom: 20px;
+}
+
+.policy-header {
+  background-color: transparent !important;
+  color: black !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  border: 2px solid black !important;
+  border-radius: 8px !important;
+  padding: 12px 24px !important;
+  cursor: pointer !important;
+  transition: background 0.3s, color 0.3s !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center;
+  gap: 10px !important;
+}
+
+.policy-header:hover {
+  background-color: black !important;
+  color: white !important;
+}
+
+.policy-content {
+  max-width: 700px;
+  margin: 15px auto 0 auto;
+  padding: 15px 20px;
+  background-color: #f9f9f9;
+  color: #333;
+  border-left: 4px solid black;
+  border-radius: 8px;
+  text-align: left;
+  animation: dropdown 0.3s ease-in-out;
+}
+.policy-content ul {
+  padding-left: 20px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  list-style: disc;
+}
+
+.policy-content p {
+  margin-bottom: 10px;
+}
+
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

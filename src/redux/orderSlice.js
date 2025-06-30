@@ -21,7 +21,6 @@ export const placeOrder = createAsyncThunk(
       });
       const data = await res.json();
       if (res.ok) {
-        toast.success('Order placed successfully');
         return data.data;
       } else {
         toast.error(data.message || 'Failed to place order');

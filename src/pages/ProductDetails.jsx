@@ -19,6 +19,8 @@ import pay from "../assets/images/payment.png";
 import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart } from '../redux/cartSlice';
+import { getProductSizes } from '../redux/productSlice';
+
 
 const ProductDetails = () => {
   const { state } = useLocation();
@@ -26,7 +28,8 @@ const ProductDetails = () => {
   const product = state?.product;
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+  const sizes = useSelector((state) => state.product.sizes);
+  console.log("Available sizes:", sizes);
   const [selectedQty, setSelectedQty] = useState(1);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState('Default');
@@ -45,6 +48,11 @@ const ProductDetails = () => {
 
   const imageRef = useRef(null);
   const [zoomStyle, setZoomStyle] = useState({});
+  useEffect(() => {
+   if (product?._id) {
+     dispatch(getProductSizes(product._id));
+   }
+  }, [dispatch, product?._id]);
 
   useEffect(() => {
     const endTime = new Date().getTime() + 5 * 60 * 1000 + 59 * 1000;
@@ -67,15 +75,6 @@ const ProductDetails = () => {
 
     return () => clearInterval(timer);
   }, []);
-
-  const handleCheckout = () => {
-    if (!currentUser || !currentUser.shippingAddress?.city) {
-      toast.info("Please add your address to proceed.");
-      navigate("/profile");
-    } else {
-      navigate("/checkout");
-    }
-  };
 
   const handleMouseMove = (e) => {
     const rect = imageRef.current.getBoundingClientRect();
@@ -207,17 +206,21 @@ dispatch(addToCart(payload));
 
           <p className="stock-warning">Only 9 item(s) left in stock!</p>
 
-          <div className="size-section">
-            {['M', 'L', 'XL', 'XXL'].map(size => (
-            <button
-              key={size}
-              className={`size-btn ${selectedSize === size ? 'selected' : ''}`}
-              onClick={() => setSelectedSize(size)}
-            >
-            {size}
-            </button>
-            ))}
-          </div>
+          {sizes && sizes.length > 0 ? (
+            <div className="size-section">
+              <p><strong>Select Size:</strong></p>
+              {sizes.map((size) => (
+                <button
+                  key={size}
+                  className={`size-btn ${selectedSize === size.toUpperCase() ? 'selected' : ''}`}
+                  onClick={() => setSelectedSize(size.toUpperCase())}>
+                   {size.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="no-sizes">No sizes available for this product.</p>
+          )}
 
          <div className="description-section1">
           <p><strong>Description:</strong></p>
@@ -266,7 +269,7 @@ dispatch(addToCart(payload));
               <img src={selectedImg} alt="cart-product" />
               <div>
                 <p>{product.name}</p>
-                <p>{product.price}</p>
+                <p>₹ {product.price}</p>
               </div>
               <div className="quantity-box">
                 <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
@@ -276,7 +279,6 @@ dispatch(addToCart(payload));
             </div>
             <div className="cart-footer">
               <p><strong>Subtotal:</strong> ₹{(cleanPrice * quantity).toFixed(2)}</p>
-              <button className="checkout-btn" onClick={handleCheckout}>Checkout</button>
               <button className="view-cart-btn" onClick={() => navigate('/cart')}>View Cart</button>
             </div>
           </div>
